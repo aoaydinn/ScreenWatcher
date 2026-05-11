@@ -39,10 +39,13 @@
         </ComboBox>
 
         <Label Content="Ek Kısayol Tuşu:" Grid.Row="3" FontWeight="Bold"/>
-        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="100,0,0,10">
-            <ComboBox ItemsSource="{Binding AvailableModifiers}" SelectedItem="{Binding CustomHotkeyModifier}" Width="100" Margin="0,0,5,0"/>
-            <Label Content="+" Margin="0,0,5,0" VerticalAlignment="Center"/>
-            <ComboBox ItemsSource="{Binding AvailableKeys}" SelectedItem="{Binding CustomHotkeyKey}" Width="100"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="100,0,0,10" VerticalAlignment="Center">
+            <CheckBox Content="Ctrl" IsChecked="{Binding IsCtrlSelected}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+            <CheckBox Content="Alt" IsChecked="{Binding IsAltSelected}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+            <CheckBox Content="Shift" IsChecked="{Binding IsShiftSelected}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+            <CheckBox Content="Win" IsChecked="{Binding IsWinSelected}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+            <Label Content="+" Margin="5,0,5,0" VerticalAlignment="Center"/>
+            <ComboBox ItemsSource="{Binding AvailableKeys}" SelectedItem="{Binding CustomHotkeyKey}" Width="100" VerticalAlignment="Center"/>
         </StackPanel>
 
         <Label Content="Dosya Adında Sorulacak Alanlar (Her satıra bir tane):" Grid.Row="4" VerticalAlignment="Top" FontWeight="Bold"/>

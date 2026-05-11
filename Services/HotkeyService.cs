@@ -22,19 +22,41 @@ namespace ScreenWatcher.Services
         private const int PRINT_SCREEN_ID = 9000;
         private const int CUSTOM_HOTKEY_ID = 9001;
 
+        public void Unregister()
+        {
+            if (_hWnd != IntPtr.Zero)
+            {
+                UnregisterHotKey(_hWnd, PRINT_SCREEN_ID);
+                UnregisterHotKey(_hWnd, CUSTOM_HOTKEY_ID);
+                _source?.RemoveHook(HwndHook);
+                _hWnd = IntPtr.Zero;
+                _source = null;
+            }
+        }
+
         public void Register(IntPtr hWnd, ModifierKeys customModifier, Key customKey)
         {
+            Unregister();
+
             _hWnd = hWnd;
             _source = HwndSource.FromHwnd(_hWnd);
             _source.AddHook(HwndHook);
 
-            // Register PrintScreen (no modifiers, Key.PrintScreen)
-            RegisterHotKey(_hWnd, PRINT_SCREEN_ID, 0, (uint)KeyInterop.VirtualKeyFromKey(Key.PrintScreen));
+            bool printOk = RegisterHotKey(_hWnd, PRINT_SCREEN_ID, 0, (uint)KeyInterop.VirtualKeyFromKey(Key.PrintScreen));
 
-            // Register Custom Hotkey
             uint modifiers = (uint)customModifier;
             uint vk = (uint)KeyInterop.VirtualKeyFromKey(customKey);
-            RegisterHotKey(_hWnd, CUSTOM_HOTKEY_ID, modifiers, vk);
+            bool customOk = RegisterHotKey(_hWnd, CUSTOM_HOTKEY_ID, modifiers, vk);
+
+            if (!printOk || !customOk)
+            {
+                Unregister();
+                if (!printOk && !customOk)
+                    throw new InvalidOperationException("Print Screen ve özel kısayol kaydedilemedi.");
+                if (!printOk)
+                    throw new InvalidOperationException("Print Screen kısayolu kaydedilemedi.");
+                throw new InvalidOperationException("Özel kısayol kaydedilemedi. Başka bir uygulama tarafından kullanılıyor olabilir.");
+            }
         }
 
         private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -53,13 +75,7 @@ namespace ScreenWatcher.Services
 
         public void Dispose()
         {
-            if (_hWnd != IntPtr.Zero)
-            {
-                UnregisterHotKey(_hWnd, PRINT_SCREEN_ID);
-                UnregisterHotKey(_hWnd, CUSTOM_HOTKEY_ID);
-                _source?.RemoveHook(HwndHook);
-                _hWnd = IntPtr.Zero;
-            }
+            Unregister();
         }
     }
 }

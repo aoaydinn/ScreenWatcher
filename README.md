@@ -1,33 +1,51 @@
-# ScreenWatcher v1.0
+# ScreenWatcher
 
-ScreenWatcher, arka planda (sistem tepsisinde) çalışan, hızlı ve özelleştirilebilir bir ekran yakalama aracıdır. Windows XP ve üzeri tüm sürümlerle uyumlu çalışması için **.NET Framework 4.0** altyapısı ile geliştirilmiştir.
+ScreenWatcher, sistem tepsisinde arka planda çalışan, **Print Screen** ve özelleştirilebilir **global kısayol** ile tam ekran görüntüsü alıp **PNG** veya **PDF** olarak kaydeden bir Windows aracıdır. **.NET Framework 4.0** hedeflenir; dağıtım için uygun geriye dönük uyumluluk sağlanır.
 
-**Geliştirici:** aoaydin
+**Sürüm:** 1.0.0 · **Geliştirici:** aoaydin
 
 ## Özellikler
 
-- **Hızlı Ekran Yakalama:** `PrintScreen` tuşuna veya sizin belirlediğiniz özel bir kısayol tuşuna (`Ctrl`, `Alt`, `Shift` + herhangi bir tuş) basarak anında tam ekran görüntüsü alabilirsiniz.
-- **Dinamik Dosya İsimlendirme:** Program ayarlarında belirlediğiniz alan başlıklarına göre (Örn: `Firma Adı`, `Döküm Kodu`), her ekran görüntüsü alındığında karşınıza bu alanları doldurabileceğiniz özel bir pencere gelir. Klavyeden hızlıca bu bilgileri doldurup `Enter` tuşuna basarak ekran görüntülerini bu alanlardan oluşan isimlerle kaydedebilirsiniz.
-- **Esnek Kayıt Formatı:** Alınan ekran görüntülerini **PNG** formatında resim olarak veya **PDF** dokümanı olarak belirlediğiniz hedef klasöre otomatik kaydedebilirsiniz.
-- **Arka Planda Çalışma:** Uygulama, ekranın sağ alt köşesindeki Sistem Tepsisinde (System Tray) sessizce çalışır ve bilgisayarınızın performansını etkilemez.
+- **İki kısayol:** Varsayılan olarak **Print Screen** ve ayarlardan tanımladığınız **özel kısayol** (ör. Ctrl+Shift+F12) birlikte kayıtlıdır; ikisi de aynı yakalama akışını tetikler.
+- **Özel kısayol:** Ctrl, Alt, Shift ve Win için **çoklu seçim** (onay kutuları) ve daraltılmış **tuş listesi** (harf, rakam, F1–F24, Space, Enter, Tab, Escape).
+- **Kayıt klasörü ve format:** Hedef klasör, **PNG** veya **PDF**; dosya adları zaman damgası ile benzersizdir.
+- **İsteğe bağlı ad alanları:** Ayarlarda “dosya adında sorulacak alanlar” satırları tanımlıysanız, her yakalamada bu alanları girebileceğiniz bir pencere açılır; **Enter** ile hızlı onay mümkündür. Alan tanımlı değilse görüntü doğrudan `EkranGoruntusu_…` önekiyle kaydedilir.
+- **Sistem tepsisi:** Sağ tık menüsü: **Ayarlar**, **Hakkında** (sürüm bilgisi), **Çıkış**.
+- **Ayarların kalıcılığı:** `%AppData%\ScreenWatcher\settings.json` dosyasına yazılır. Kayıt veya dosya yazımı başarısız olursa uygulama kullanıcıya uyarı gösterir; ayarlar diske yazılamadıysa kısayol güncellemesi yapılmaz.
 
-## Kurulum ve Kullanım
+## Kurulum ve kullanım
 
-1. Uygulamayı başlattığınızda sistem tepsisinde bir ikon belirecektir.
-2. Bu ikona sağ tıklayıp **"Ayarlar"** menüsünü açın.
-3. Ayarlar sayfasında:
-   - Kayıt edilecek hedef klasörü,
-   - Kayıt formatını (PDF/PNG),
-   - Sormasını istediğiniz "Dosya Adı Alanlarını" (Her satıra bir tane olacak şekilde, Örn: `Müşteri Adı`, `Referans Kodu`)
-   - Ve ek kısayol tuşunuzu belirleyin.
-4. "Kaydet ve Kapat" dedikten sonra programı arka plana gizleyebilirsiniz.
-5. Ekran görüntüsü almak istediğinizde belirlediğiniz kısayol tuşuna basın, çıkan pencereye değerleri yazıp `Enter` tuşuyla seri bir şekilde dosyalarınızı kaydedin.
+1. `ScreenWatcher.exe` dosyasını çalıştırın; sistem tepsisinde ikon belirir.
+2. İkona **sağ tıklayıp** **Ayarlar**’ı açın.
+3. **Kaydedilecek klasör**, **kayıt formatı** (PNG/PDF), isteğe bağlı **dosya adı alanları** (her satıra bir etiket) ve **ek kısayol** (modifier + tuş) değerlerini girin.
+4. **Kaydet ve Kapat** ile ayarları diske yazın ve pencereyi kapatın; kısayollar bu andan itibaren güncellenir. İsterseniz **Arka Plana Gizle** ile pencereyi kapatmadan simgeye indirebilirsiniz.
+5. **Print Screen** veya tanımlı özel kısayola basarak ekran görüntüsü alın; alanlar tanımlıysa açılan pencerede değerleri girip onaylayın.
 
-## Teknik Altyapı
-- **Dil:** C# (WPF)
-- **Framework:** .NET Framework 4.0
-- **Kütüphaneler:** PdfSharp (PDF oluşturma), Hardcodet.NotifyIcon.Wpf (Sistem Tepsisi entegrasyonu), Newtonsoft.Json (Ayar yönetimi).
+## Gereksinimler
+
+- Windows (WPF ve global kısayol API’leri için uygun bir Windows sürümü).
+- Çalışma zamanı: **.NET Framework 4.0** veya üzeri (hedef çerçeve 4.0).
+
+## Geliştirici: derleme
+
+```text
+dotnet build ScreenWatcher.csproj -c Release
+```
+
+Çıktı: `bin\Release\ScreenWatcher.exe` (hedef çerçeveye göre alt klasör yapısı değişebilir).
+
+## Teknik özet
+
+| Alan | Açıklama |
+|------|----------|
+| Dil / UI | C#, WPF |
+| Hedef çerçeve | .NET Framework 4.0 |
+| PDF | PdfSharp |
+| Tepsi ikonu | Hardcodet.NotifyIcon.Wpf |
+| Ayarlar | Newtonsoft.Json |
+| Gömülü bağımlılıklar | Costura.Fody / Fody (isteğe bağlı paket yapılandırması) |
+| Global kısayol | `RegisterHotKey` / `UnregisterHotKey`, pencere mesaj kancası |
 
 ---
 
-*Bu proje, iş akışlarını hızlandırmak ve manuel isimlendirme hatalarını önlemek amacıyla özel olarak tasarlanmıştır.*
+*İş akışını hızlandırmak ve dosya adlandırma tutarlılığını artırmak için tasarlanmıştır.*

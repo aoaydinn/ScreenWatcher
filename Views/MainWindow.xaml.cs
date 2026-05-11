@@ -20,11 +20,15 @@ namespace ScreenWatcher.Views
             this.Hide();
         }
 
+        public bool IsReallyClosing { get; set; } = false;
+
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            // Just hide it instead of closing, unless application is shutting down.
-            e.Cancel = true;
-            this.Hide();
+            if (!IsReallyClosing)
+            {
+                e.Cancel = true;
+                this.Hide();
+            }
         }
     }
 }

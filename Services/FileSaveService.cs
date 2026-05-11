@@ -13,51 +13,54 @@ namespace ScreenWatcher.Services
         {
             if (bitmap == null) return null;
 
-            if (!Directory.Exists(targetFolder))
-            {
-                Directory.CreateDirectory(targetFolder);
-            }
-
             string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             string safePrefix = string.IsNullOrWhiteSpace(fileNamePrefix) ? "Screenshot" : fileNamePrefix;
-            
-            // Temizleme: Dosya isminde olmaması gereken karakterleri temizle
+
             foreach (char c in Path.GetInvalidFileNameChars())
             {
                 safePrefix = safePrefix.Replace(c, '_');
             }
 
-            if (string.Equals(format, "PDF", StringComparison.OrdinalIgnoreCase))
+            try
             {
-                string filename = Path.Combine(targetFolder, $"{safePrefix}_{timestamp}.pdf");
-                using (var document = new PdfDocument())
+                if (!Directory.Exists(targetFolder))
                 {
-                    var page = document.AddPage();
-                    page.Width = bitmap.Width;
-                    page.Height = bitmap.Height;
+                    Directory.CreateDirectory(targetFolder);
+                }
 
-                    using (var gfx = XGraphics.FromPdfPage(page))
+                if (string.Equals(format, "PDF", StringComparison.OrdinalIgnoreCase))
+                {
+                    string filename = Path.Combine(targetFolder, $"{safePrefix}_{timestamp}.pdf");
+                    using (var document = new PdfDocument())
                     {
-                        // Save bitmap to memory stream first because XImage.FromGdiPlusImage might have issues in some versions
-                        using (MemoryStream ms = new MemoryStream())
+                        var page = document.AddPage();
+                        page.Width = bitmap.Width;
+                        page.Height = bitmap.Height;
+
+                        using (var gfx = XGraphics.FromPdfPage(page))
                         {
-                            bitmap.Save(ms, ImageFormat.Png);
-                            ms.Position = 0;
-                            using (var image = XImage.FromStream(ms))
+                            using (MemoryStream ms = new MemoryStream())
                             {
-                                gfx.DrawImage(image, 0, 0, bitmap.Width, bitmap.Height);
+                                bitmap.Save(ms, ImageFormat.Png);
+                                ms.Position = 0;
+                                using (var image = XImage.FromStream(ms))
+                                {
+                                    gfx.DrawImage(image, 0, 0, bitmap.Width, bitmap.Height);
+                                }
                             }
                         }
+                        document.Save(filename);
                     }
-                    document.Save(filename);
+                    return filename;
                 }
-                return filename;
+
+                string pngPath = Path.Combine(targetFolder, $"{safePrefix}_{timestamp}.png");
+                bitmap.Save(pngPath, ImageFormat.Png);
+                return pngPath;
             }
-            else // Default to PNG
+            catch (Exception ex)
             {
-                string filename = Path.Combine(targetFolder, $"{safePrefix}_{timestamp}.png");
-                bitmap.Save(filename, ImageFormat.Png);
-                return filename;
+                throw new InvalidOperationException("Ekran görüntüsü dosyaya kaydedilemedi. " + ex.Message, ex);
             }
         }
     }

@@ -18,6 +18,7 @@ namespace ScreenWatcher
         private ScreenshotService _screenshotService;
         private FileSaveService _fileSaveService;
         private HotkeyService _hotkeyService;
+        private System.Drawing.Icon _appIcon;
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
@@ -25,7 +26,8 @@ namespace ScreenWatcher
             
             try
             {
-                _notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                _appIcon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                _notifyIcon.Icon = _appIcon;
             }
             catch
             {
@@ -44,7 +46,14 @@ namespace ScreenWatcher
             helper.EnsureHandle();
 
             var settings = SettingsManager.Load();
-            _hotkeyService.Register(helper.Handle, settings.CustomHotkey.Modifier, settings.CustomHotkey.Key);
+            try
+            {
+                _hotkeyService.Register(helper.Handle, settings.CustomHotkey.Modifier, settings.CustomHotkey.Key);
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show(ex.Message, "Kısayol kaydı", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
             _hotkeyService.HotkeyPressed += HotkeyService_HotkeyPressed;
 
             // Start minimized / hidden
@@ -58,37 +67,49 @@ namespace ScreenWatcher
             {
                 if (screenshot == null) return;
 
-                // Create a clone of the bitmap so we don't dispose it while waiting for UI thread
-                Bitmap screenshotClone = new Bitmap(screenshot);
-
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                using (Bitmap screenshotClone = new Bitmap(screenshot))
                 {
-                    bool hasKeywords = settings.Keywords != null && settings.Keywords.Any(k => !string.IsNullOrWhiteSpace(k));
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        bool hasKeywords = settings.Keywords != null && settings.Keywords.Any(k => !string.IsNullOrWhiteSpace(k));
 
-                    if (!hasKeywords)
-                    {
-                        string file = _fileSaveService.Save(screenshotClone, settings.SaveFolder, settings.SaveFormat, "EkranGoruntusu");
-                        if (file != null)
+                        if (!hasKeywords)
                         {
-                            _notifyIcon.ShowBalloonTip("Ekran Görüntüsü Kaydedildi", $"Dosya: {System.IO.Path.GetFileName(file)}", BalloonIcon.Info);
-                        }
-                        screenshotClone.Dispose();
-                    }
-                    else
-                    {
-                        Views.SavePromptWindow prompt = new Views.SavePromptWindow(settings.Keywords);
-                        if (prompt.ShowDialog() == true)
-                        {
-                            string fileNamePrefix = prompt.SelectedFileName;
-                            string file = _fileSaveService.Save(screenshotClone, settings.SaveFolder, settings.SaveFormat, fileNamePrefix);
-                            if (file != null)
+                            try
                             {
-                                _notifyIcon.ShowBalloonTip("Ekran Görüntüsü Kaydedildi", $"Dosya: {System.IO.Path.GetFileName(file)}", BalloonIcon.Info);
+                                string file = _fileSaveService.Save(screenshotClone, settings.SaveFolder, settings.SaveFormat, "EkranGoruntusu");
+                                if (file != null)
+                                {
+                                    _notifyIcon.ShowBalloonTip("Ekran Görüntüsü Kaydedildi", $"Dosya: {System.IO.Path.GetFileName(file)}", BalloonIcon.Info);
+                                }
+                            }
+                            catch (InvalidOperationException ex)
+                            {
+                                MessageBox.Show(ex.Message, "Dosya kaydı", MessageBoxButton.OK, MessageBoxImage.Warning);
                             }
                         }
-                        screenshotClone.Dispose();
-                    }
-                }));
+                        else
+                        {
+                            Views.SavePromptWindow prompt = new Views.SavePromptWindow(settings.Keywords);
+                            if (prompt.ShowDialog() == true)
+                            {
+                                try
+                                {
+                                    string fileNamePrefix = prompt.SelectedFileName;
+                                    string file = _fileSaveService.Save(screenshotClone, settings.SaveFolder, settings.SaveFormat, fileNamePrefix);
+                                    if (file != null)
+                                    {
+                                        _notifyIcon.ShowBalloonTip("Ekran Görüntüsü Kaydedildi", $"Dosya: {System.IO.Path.GetFileName(file)}", BalloonIcon.Info);
+                                    }
+                                }
+                                catch (InvalidOperationException ex)
+                                {
+                                    MessageBox.Show(ex.Message, "Dosya kaydı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                }
+                            }
+                        }
+                    }));
+                }
             }
         }
 
@@ -106,8 +127,32 @@ namespace ScreenWatcher
             new AboutWindow().ShowDialog();
         }
 
+        public void UpdateHotkey()
+        {
+            if (_mainWindow != null && _hotkeyService != null)
+            {
+                _hotkeyService.Unregister();
+                var settings = SettingsManager.Load();
+                var helper = new WindowInteropHelper(_mainWindow);
+                helper.EnsureHandle();
+                try
+                {
+                    _hotkeyService.Register(helper.Handle, settings.CustomHotkey.Modifier, settings.CustomHotkey.Key);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    MessageBox.Show(ex.Message, "Kısayol kaydı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+        }
+
         private void MenuExit_Click(object sender, RoutedEventArgs e)
         {
+            if (_mainWindow != null)
+            {
+                _mainWindow.IsReallyClosing = true;
+                _mainWindow.Close();
+            }
             Current.Shutdown();
         }
 
@@ -115,6 +160,7 @@ namespace ScreenWatcher
         {
             _hotkeyService?.Dispose();
             _notifyIcon?.Dispose();
+            _appIcon?.Dispose();
         }
     }
 }

@@ -41,13 +41,51 @@ namespace ScreenWatcher.ViewModels
             set { _keywordsText = value; OnPropertyChanged("KeywordsText"); }
         }
 
-        public Array AvailableModifiers => Enum.GetValues(typeof(ModifierKeys));
-        public Array AvailableKeys => Enum.GetValues(typeof(Key));
-
-        public ModifierKeys CustomHotkeyModifier
+        public Array AvailableKeys 
         {
-            get => _settings.CustomHotkey.Modifier;
-            set { _settings.CustomHotkey.Modifier = value; OnPropertyChanged("CustomHotkeyModifier"); }
+            get
+            {
+                // Return only useful keys instead of all ~150 keys.
+                var allKeys = Enum.GetValues(typeof(Key)).Cast<Key>();
+                return allKeys.Where(k => 
+                    (k >= Key.A && k <= Key.Z) || 
+                    (k >= Key.D0 && k <= Key.D9) || 
+                    (k >= Key.F1 && k <= Key.F24) ||
+                    k == Key.Space || k == Key.Enter || k == Key.Tab || k == Key.Escape
+                ).Distinct().ToArray();
+            }
+        }
+
+        public bool IsCtrlSelected
+        {
+            get => _settings.CustomHotkey.Modifier.HasFlag(ModifierKeys.Control);
+            set { UpdateModifier(ModifierKeys.Control, value); OnPropertyChanged("IsCtrlSelected"); }
+        }
+
+        public bool IsAltSelected
+        {
+            get => _settings.CustomHotkey.Modifier.HasFlag(ModifierKeys.Alt);
+            set { UpdateModifier(ModifierKeys.Alt, value); OnPropertyChanged("IsAltSelected"); }
+        }
+
+        public bool IsShiftSelected
+        {
+            get => _settings.CustomHotkey.Modifier.HasFlag(ModifierKeys.Shift);
+            set { UpdateModifier(ModifierKeys.Shift, value); OnPropertyChanged("IsShiftSelected"); }
+        }
+
+        public bool IsWinSelected
+        {
+            get => _settings.CustomHotkey.Modifier.HasFlag(ModifierKeys.Windows);
+            set { UpdateModifier(ModifierKeys.Windows, value); OnPropertyChanged("IsWinSelected"); }
+        }
+
+        private void UpdateModifier(ModifierKeys mod, bool isAdd)
+        {
+            if (isAdd)
+                _settings.CustomHotkey.Modifier |= mod;
+            else
+                _settings.CustomHotkey.Modifier &= ~mod;
         }
 
         public Key CustomHotkeyKey
@@ -79,10 +117,20 @@ namespace ScreenWatcher.ViewModels
                 .Where(k => !string.IsNullOrEmpty(k))
                 .ToList();
 
-            SettingsManager.Save(_settings);
-            
-            // Inform user or close (we can handle closing in the view)
-            System.Windows.MessageBox.Show("Ayarlar kaydedildi. Uygulamayı yeniden başlatmanız kısayol değişiklikleri için gerekebilir.", "Bilgi", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            if (!SettingsManager.Save(_settings))
+            {
+                System.Windows.MessageBox.Show(
+                    "Ayarlar dosyaya kaydedilemedi. Klasör izinlerini veya disk alanını kontrol edin.",
+                    "Ayarlar",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            var app = System.Windows.Application.Current as App;
+            app?.UpdateHotkey();
+
+            System.Windows.MessageBox.Show("Ayarlar kaydedildi ve kısayol güncellendi.", "Bilgi", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

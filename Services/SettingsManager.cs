@@ -30,22 +30,23 @@ namespace ScreenWatcher.Services
             return new AppSettings();
         }
 
-        public static void Save(AppSettings settings)
+        public static bool Save(AppSettings settings)
         {
             try
             {
                 var directory = Path.GetDirectoryName(SettingsFile);
-                if (!Directory.Exists(directory))
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
                 }
 
                 string json = JsonConvert.SerializeObject(settings, Formatting.Indented);
                 File.WriteAllText(SettingsFile, json);
+                return true;
             }
             catch
             {
-                // Ignore save errors for simplicity
+                return false;
             }
         }
     }
