@@ -63,17 +63,31 @@ namespace ScreenWatcher
 
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
-                    Views.SavePromptWindow prompt = new Views.SavePromptWindow(settings.Keywords);
-                    if (prompt.ShowDialog() == true)
+                    bool hasKeywords = settings.Keywords != null && settings.Keywords.Any(k => !string.IsNullOrWhiteSpace(k));
+
+                    if (!hasKeywords)
                     {
-                        string fileNamePrefix = prompt.SelectedFileName;
-                        string file = _fileSaveService.Save(screenshotClone, settings.SaveFolder, settings.SaveFormat, fileNamePrefix);
+                        string file = _fileSaveService.Save(screenshotClone, settings.SaveFolder, settings.SaveFormat, "EkranGoruntusu");
                         if (file != null)
                         {
                             _notifyIcon.ShowBalloonTip("Ekran Görüntüsü Kaydedildi", $"Dosya: {System.IO.Path.GetFileName(file)}", BalloonIcon.Info);
                         }
+                        screenshotClone.Dispose();
                     }
-                    screenshotClone.Dispose();
+                    else
+                    {
+                        Views.SavePromptWindow prompt = new Views.SavePromptWindow(settings.Keywords);
+                        if (prompt.ShowDialog() == true)
+                        {
+                            string fileNamePrefix = prompt.SelectedFileName;
+                            string file = _fileSaveService.Save(screenshotClone, settings.SaveFolder, settings.SaveFormat, fileNamePrefix);
+                            if (file != null)
+                            {
+                                _notifyIcon.ShowBalloonTip("Ekran Görüntüsü Kaydedildi", $"Dosya: {System.IO.Path.GetFileName(file)}", BalloonIcon.Info);
+                            }
+                        }
+                        screenshotClone.Dispose();
+                    }
                 }));
             }
         }

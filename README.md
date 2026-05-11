@@ -7,7 +7,7 @@ ScreenWatcher, arka planda (sistem tepsisinde) çalışan, hızlı ve özelleşt
 ## Özellikler
 
 - **Hızlı Ekran Yakalama:** `PrintScreen` tuşuna veya sizin belirlediğiniz özel bir kısayol tuşuna (`Ctrl`, `Alt`, `Shift` + herhangi bir tuş) basarak anında tam ekran görüntüsü alabilirsiniz.
-- **Dinamik Dosya İsimlendirme:** Program ayarlarında belirlediğiniz alan başlıklarına göre (Örn: `AD`, `SOYAD`), her ekran görüntüsü alındığında karşınıza bu alanları doldurabileceğiniz özel bir pencere gelir. Klavyeden hızlıca bu bilgileri doldurup `Enter` tuşuna basarak ekran görüntülerini bu alanlardan oluşan isimlerle kaydedebilirsiniz.
+- **Dinamik Dosya İsimlendirme:** Program ayarlarında belirlediğiniz alan başlıklarına göre (Örn: `Firma Adı`, `Döküm Kodu`), her ekran görüntüsü alındığında karşınıza bu alanları doldurabileceğiniz özel bir pencere gelir. Klavyeden hızlıca bu bilgileri doldurup `Enter` tuşuna basarak ekran görüntülerini bu alanlardan oluşan isimlerle kaydedebilirsiniz.
 - **Esnek Kayıt Formatı:** Alınan ekran görüntülerini **PNG** formatında resim olarak veya **PDF** dokümanı olarak belirlediğiniz hedef klasöre otomatik kaydedebilirsiniz.
 - **Arka Planda Çalışma:** Uygulama, ekranın sağ alt köşesindeki Sistem Tepsisinde (System Tray) sessizce çalışır ve bilgisayarınızın performansını etkilemez.
 
