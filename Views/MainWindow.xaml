@@ -1,0 +1,60 @@
+<Window x:Class="ScreenWatcher.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ScreenWatcher.ViewModels"
+        mc:Ignorable="d"
+        Title="ScreenWatcher v1.0" Height="450" Width="450"
+        WindowStartupLocation="CenterScreen"
+        Closing="Window_Closing">
+    <Window.DataContext>
+        <local:MainWindowViewModel />
+    </Window.DataContext>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <Label Content="Kaydedilecek Klasör:" Grid.Row="0" FontWeight="Bold"/>
+        <Grid Grid.Row="1" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding SaveFolder}" Grid.Column="0" Margin="0,0,5,0" IsReadOnly="True" />
+            <Button Content="Gözat..." Command="{Binding BrowseFolderCommand}" Grid.Column="1" Width="70"/>
+        </Grid>
+
+        <Label Content="Kayıt Formatı:" Grid.Row="2" FontWeight="Bold"/>
+        <ComboBox SelectedValue="{Binding SaveFormat}" SelectedValuePath="Content" Grid.Row="2" Margin="100,0,0,10" Width="100" HorizontalAlignment="Left">
+            <ComboBoxItem Content="PNG"/>
+            <ComboBoxItem Content="PDF"/>
+        </ComboBox>
+
+        <Label Content="Ek Kısayol Tuşu:" Grid.Row="3" FontWeight="Bold"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="100,0,0,10">
+            <ComboBox ItemsSource="{Binding AvailableModifiers}" SelectedItem="{Binding CustomHotkeyModifier}" Width="100" Margin="0,0,5,0"/>
+            <Label Content="+" Margin="0,0,5,0" VerticalAlignment="Center"/>
+            <ComboBox ItemsSource="{Binding AvailableKeys}" SelectedItem="{Binding CustomHotkeyKey}" Width="100"/>
+        </StackPanel>
+
+        <Label Content="Dosya Adında Sorulacak Alanlar (Her satıra bir tane):" Grid.Row="4" VerticalAlignment="Top" FontWeight="Bold"/>
+        <TextBox Text="{Binding KeywordsText}" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Grid.Row="4" Margin="0,25,0,10"/>
+
+        <Grid Grid.Row="6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="Kaydet ve Kapat" Command="{Binding SaveCommand}" Click="SaveAndClose_Click" Grid.Column="0" Margin="0,0,5,0" Height="30"/>
+            <Button Content="Arka Plana Gizle" Click="Hide_Click" Grid.Column="1" Margin="5,0,0,0" Height="30"/>
+        </Grid>
+    </Grid>
+</Window>
