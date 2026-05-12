@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using System.Windows.Forms; // for FolderBrowserDialog
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace ScreenWatcher.ViewModels
 {
@@ -99,12 +99,15 @@ namespace ScreenWatcher.ViewModels
 
         private void ExecuteBrowseFolder(object obj)
         {
-            using (var dialog = new FolderBrowserDialog())
+            using (var dialog = new CommonOpenFileDialog())
             {
-                dialog.SelectedPath = SaveFolder;
-                if (dialog.ShowDialog() == DialogResult.OK)
+                dialog.IsFolderPicker = true;
+                dialog.InitialDirectory = SaveFolder;
+                dialog.Title = "Kaydedilecek Klasörü Seçin (Ağ dizinleri desteklenir)";
+                
+                if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
-                    SaveFolder = dialog.SelectedPath;
+                    SaveFolder = dialog.FileName;
                 }
             }
         }
